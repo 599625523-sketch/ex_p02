@@ -1,0 +1,41 @@
+---
+title: "Data Cleaning and Storage"
+---
+
+## Single-Table Cleaning (6 Steps)
+
+| Step | Action | Result |
+|------|--------|--------|
+| 1. Missing detection | Count NaN and empty strings per column | No missing values (baostock data is complete) |
+| 2. Missing handling | ffill for prices, fill 0 for volume | Defensive processing, no actual changes |
+| 3. Date format | Convert to datetime64[ns] | All 10 stocks converted successfully |
+| 4. Data type check | Confirm price/volume columns are numeric | All numeric, no conversion needed |
+| 5. Duplicate removal | Deduplicate by date | 0 duplicates removed |
+| 6. Outlier flagging | Flag daily return exceeding 20% as is_extreme | Flagged but not removed |
+
+Outlier causes include ex-dividend adjustments in backward-adjusted data, resumption after suspension, and extreme market events.
+
+## Wide and Long Table Conversion
+
+Wide table: 1515 days x 10 stocks (one column per stock). Suitable for correlation matrices, multi-line charts, and cross-stock calculations.
+
+Long table: 15,150 rows x 3 columns (date, code, close). Suitable for groupby operations, faceted plots, panel regression, and database storage.
+
+## Multi-Table Merge
+
+Stocks (15,150 rows) + Index: left join by date, resulting in 15,150 rows (unchanged, since trading days are aligned).
+
+Monthly macro data (CPI, M2) mapped to daily data via year-month key. CPI has about 1,600 missing values and M2 about 260, both due to publication lag. Final combined dataset: 15,150 rows x 16 columns.
+
+## Storage Format Comparison
+
+Base format (Method A): CSV for all data.
+
+Advanced format (Method B): Parquet, chosen for its columnar storage and built-in schema.
+
+| Metric | CSV | Parquet |
+|--------|-----|---------|
+| File size | 1898.3 KB | 888.1 KB (46.8%) |
+| Read time | 0.056s | 0.022s (40.4%) |
+
+Parquet is less than half the size and reads 60% faster. The advantage grows significantly with larger datasets (millions of rows) and selective column reads.

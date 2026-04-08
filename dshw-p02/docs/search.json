@@ -1,0 +1,172 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "P02 Financial Data Analysis",
+    "section": "",
+    "text": "0.1 Key Findings\nThis is the analysis report for ex_P02 (Data Science and Finance).\nWe selected 10 A-share stocks from 7 industries and built a complete pipeline covering data acquisition, cleaning, storage, descriptive statistics, visualization, and CAPM regression.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Preface</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#key-findings",
+    "href": "index.html#key-findings",
+    "title": "P02 Financial Data Analysis",
+    "section": "",
+    "text": "BYD had the highest annualized return (+30.6%), Vanke the lowest (-32.4%)\nAll return distributions exhibit fat tails, invalidating the normality assumption\nIntra-industry correlations are significantly higher than cross-industry ones\nCAPM Beta aligns well with cyclical vs defensive industry classification",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Preface</span>"
+    ]
+  },
+  {
+    "objectID": "ch01.html",
+    "href": "ch01.html",
+    "title": "2  Data Download",
+    "section": "",
+    "text": "2.1 Stock List\nWe selected 10 stocks covering 7 industries (Banking, Auto, Liquor, Real Estate, Energy, Telecom, Logistics).",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data Download</span>"
+    ]
+  },
+  {
+    "objectID": "ch01.html#stock-list",
+    "href": "ch01.html#stock-list",
+    "title": "2  Data Download",
+    "section": "",
+    "text": "Code\nName\nIndustry\nReason\n\n\n\n\n600036\nCMBC (Zhao Shang Yin Hang)\nBanking\nLeading joint-stock bank\n\n\n601398\nICBC (Gong Shang Yin Hang)\nBanking\nLargest bank by assets globally\n\n\n002594\nBYD (Bi Ya Di)\nAuto\nEV sales leader\n\n\n600519\nMoutai (Gui Zhou Mao Tai)\nLiquor\nA-share market cap benchmark\n\n\n000858\nWuliangye (Wu Liang Ye)\nLiquor\nSecond-tier liquor leader\n\n\n000002\nVanke (Wan Ke)\nReal Estate\nEstablished real estate leader\n\n\n601857\nPetroChina (Zhong Guo Shi You)\nEnergy\nLargest domestic oil and gas producer\n\n\n600028\nSinopec (Zhong Guo Shi Hua)\nEnergy\nIntegrated refining leader\n\n\n000063\nZTE (Zhong Xing Tong Xun)\nTelecom\nCore 5G equipment supplier\n\n\n002352\nSF Express (Shun Feng)\nLogistics\nPremium express delivery leader",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data Download</span>"
+    ]
+  },
+  {
+    "objectID": "ch01.html#data-sources",
+    "href": "ch01.html#data-sources",
+    "title": "2  Data Download",
+    "section": "2.2 Data Sources",
+    "text": "2.2 Data Sources\n\n\n\n\n\n\n\n\n\nData Type\nSource\nInterface\nDetails\n\n\n\n\nStock prices\nbaostock\nquery_history_k_data_plus()\nDaily, backward-adjusted, 2020-01 to 2026-04\n\n\nMarket index\nbaostock\nquery_history_k_data_plus()\nCSI 300 + CSI 500\n\n\nCPI YoY\nakshare\nmacro_china_cpi_yearly()\n70 monthly records\n\n\nM2 YoY\nakshare\nmacro_china_money_supply()\n74 monthly records\n\n\nFinancials\nbaostock\nquery_profit_data()\nROE and net profit margin, 10 x 5 years",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data Download</span>"
+    ]
+  },
+  {
+    "objectID": "ch01.html#download-summary",
+    "href": "ch01.html#download-summary",
+    "title": "2  Data Download",
+    "section": "2.3 Download Summary",
+    "text": "2.3 Download Summary\nAll 10 stocks downloaded successfully with 1515 trading days each. Both indices (CSI 300 and CSI 500) have 1515 rows. Financial data contains 100 records (10 stocks x 5 years x 2 indicators). All download events are recorded in download_log.txt.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data Download</span>"
+    ]
+  },
+  {
+    "objectID": "ch02.html",
+    "href": "ch02.html",
+    "title": "3  Data Cleaning and Storage",
+    "section": "",
+    "text": "3.1 Single-Table Cleaning (6 Steps)\nOutlier causes include ex-dividend adjustments in backward-adjusted data, resumption after suspension, and extreme market events.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Data Cleaning and Storage</span>"
+    ]
+  },
+  {
+    "objectID": "ch02.html#single-table-cleaning-6-steps",
+    "href": "ch02.html#single-table-cleaning-6-steps",
+    "title": "3  Data Cleaning and Storage",
+    "section": "",
+    "text": "Step\nAction\nResult\n\n\n\n\n1. Missing detection\nCount NaN and empty strings per column\nNo missing values (baostock data is complete)\n\n\n2. Missing handling\nffill for prices, fill 0 for volume\nDefensive processing, no actual changes\n\n\n3. Date format\nConvert to datetime64[ns]\nAll 10 stocks converted successfully\n\n\n4. Data type check\nConfirm price/volume columns are numeric\nAll numeric, no conversion needed\n\n\n5. Duplicate removal\nDeduplicate by date\n0 duplicates removed\n\n\n6. Outlier flagging\nFlag daily return exceeding 20% as is_extreme\nFlagged but not removed",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Data Cleaning and Storage</span>"
+    ]
+  },
+  {
+    "objectID": "ch02.html#wide-and-long-table-conversion",
+    "href": "ch02.html#wide-and-long-table-conversion",
+    "title": "3  Data Cleaning and Storage",
+    "section": "3.2 Wide and Long Table Conversion",
+    "text": "3.2 Wide and Long Table Conversion\nWide table: 1515 days x 10 stocks (one column per stock). Suitable for correlation matrices, multi-line charts, and cross-stock calculations.\nLong table: 15,150 rows x 3 columns (date, code, close). Suitable for groupby operations, faceted plots, panel regression, and database storage.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Data Cleaning and Storage</span>"
+    ]
+  },
+  {
+    "objectID": "ch02.html#multi-table-merge",
+    "href": "ch02.html#multi-table-merge",
+    "title": "3  Data Cleaning and Storage",
+    "section": "3.3 Multi-Table Merge",
+    "text": "3.3 Multi-Table Merge\nStocks (15,150 rows) + Index: left join by date, resulting in 15,150 rows (unchanged, since trading days are aligned).\nMonthly macro data (CPI, M2) mapped to daily data via year-month key. CPI has about 1,600 missing values and M2 about 260, both due to publication lag. Final combined dataset: 15,150 rows x 16 columns.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Data Cleaning and Storage</span>"
+    ]
+  },
+  {
+    "objectID": "ch02.html#storage-format-comparison",
+    "href": "ch02.html#storage-format-comparison",
+    "title": "3  Data Cleaning and Storage",
+    "section": "3.4 Storage Format Comparison",
+    "text": "3.4 Storage Format Comparison\nBase format (Method A): CSV for all data.\nAdvanced format (Method B): Parquet, chosen for its columnar storage and built-in schema.\n\n\n\nMetric\nCSV\nParquet\n\n\n\n\nFile size\n1898.3 KB\n888.1 KB (46.8%)\n\n\nRead time\n0.056s\n0.022s (40.4%)\n\n\n\nParquet is less than half the size and reads 60% faster. The advantage grows significantly with larger datasets (millions of rows) and selective column reads.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Data Cleaning and Storage</span>"
+    ]
+  },
+  {
+    "objectID": "ch03.html",
+    "href": "ch03.html",
+    "title": "4  Analysis and CAPM Regression",
+    "section": "",
+    "text": "4.1 Descriptive Statistics\nDaily log returns: \\(r_t = \\ln(P_t / P_{t-1})\\)\nAll stocks exhibit leptokurtic (fat-tail) distributions with excess kurtosis well above zero, meaning the normal distribution systematically underestimates extreme risk. ICBC has the lowest volatility (16.3%) and smallest max drawdown (-20.2%), reflecting its defensive nature.",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Analysis and CAPM Regression</span>"
+    ]
+  },
+  {
+    "objectID": "ch03.html#descriptive-statistics",
+    "href": "ch03.html#descriptive-statistics",
+    "title": "4  Analysis and CAPM Regression",
+    "section": "",
+    "text": "Stock\nIndustry\nAnn.Return\nAnn.Vol\nSkewness\nKurtosis\nMax Drawdown\n\n\n\n\nBYD\nAuto\n0.3060\n0.4330\n0.30\n2.09\n-52.54%\n\n\nPetroChina\nEnergy\n0.1754\n0.2927\n0.22\n5.17\n-32.47%\n\n\nICBC\nBanking\n0.0924\n0.1628\n0.46\n5.82\n-20.20%\n\n\nSinopec\nEnergy\n0.0860\n0.2335\n0.36\n5.37\n-25.06%\n\n\nMoutai\nLiquor\n0.0642\n0.2770\n0.26\n3.61\n-47.48%\n\n\nCMBC\nBanking\n0.0468\n0.2773\n0.26\n3.15\n-50.94%\n\n\nSF Express\nLogistics\n0.0158\n0.3243\n0.38\n3.55\n-70.77%\n\n\nWuliangye\nLiquor\n-0.0136\n0.3454\n0.09\n3.32\n-66.09%\n\n\nZTE\nTelecom\n-0.0019\n0.4260\n0.31\n2.49\n-61.87%\n\n\nVanke\nReal Estate\n-0.3243\n0.3640\n0.66\n3.25\n-86.73%",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Analysis and CAPM Regression</span>"
+    ]
+  },
+  {
+    "objectID": "ch03.html#visualization-summary",
+    "href": "ch03.html#visualization-summary",
+    "title": "4  Analysis and CAPM Regression",
+    "section": "4.2 Visualization Summary",
+    "text": "4.2 Visualization Summary\nFigure 1 (Normalized Price): BYD surged far above the benchmark; Vanke declined to about 13% of its starting value; banking stocks tracked the CSI 300 closely.\nFigure 2 (Return Distribution): All histograms show peaked centers and fat tails relative to the overlaid normal curve.\nFigure 3 (Correlation Heatmap): Intra-industry pairs (CMBC-ICBC, Moutai-Wuliangye, PetroChina-Sinopec) show notably higher correlations, supporting diversification across industries.\nFigure 4 (M2 vs CSI 300): Weak contemporaneous linear relationship between M2 growth and monthly index returns, likely due to policy transmission lags and counter-cyclical easing.\nFigure 5 (ROE Trends): Liquor ROE consistently high; banking ROE stable but declining; Vanke ROE fell sharply; BYD ROE rising.",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Analysis and CAPM Regression</span>"
+    ]
+  },
+  {
+    "objectID": "ch03.html#capm-regression",
+    "href": "ch03.html#capm-regression",
+    "title": "4  Analysis and CAPM Regression",
+    "section": "4.3 CAPM Regression",
+    "text": "4.3 CAPM Regression\nModel: \\(r_{i,t} - r_f = \\alpha_i + \\beta_i (r_{m,t} - r_f) + \\varepsilon_{i,t}\\)\nMarket benchmark: CSI 300. Risk-free rate: 2.0% annualized (daily = 0.02/252). Sample: 1,514 trading days.\n\n\n\n\n\n\n\n\n\n\n\n\nStock\nIndustry\nAlpha\np-value\nBeta\n95% CI\nR-squared\n\n\n\n\nWuliangye\nLiquor\n-0.000088\n0.8245\n1.2945\n[1.23, 1.36]\n0.4985\n\n\nMoutai\nLiquor\n+0.000210\n0.5316\n0.9772\n[0.92, 1.03]\n0.4418\n\n\nCMBC\nBanking\n+0.000138\n0.6968\n0.9049\n[0.85, 0.96]\n0.3780\n\n\nBYD\nAuto\n+0.001180\n0.0428*\n1.2817\n[1.19, 1.38]\n0.3110\n\n\nZTE\nTelecom\n-0.000043\n0.9398\n1.2436\n[1.15, 1.34]\n0.3025\n\n\nVanke\nReal Estate\n-0.001331\n0.0083*\n1.0028\n[0.92, 1.09]\n0.2693\n\n\nSF Express\nLogistics\n+0.000014\n0.9756\n0.8751\n[0.80, 0.95]\n0.2584\n\n\nPetroChina\nEnergy\n+0.000633\n0.1614\n0.4685\n[0.39, 0.54]\n0.0910\n\n\nSinopec\nEnergy\n+0.000275\n0.4467\n0.3668\n[0.31, 0.43]\n0.0876\n\n\nICBC\nBanking\n+0.000295\n0.2470\n0.2222\n[0.18, 0.26]\n0.0661",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Analysis and CAPM Regression</span>"
+    ]
+  },
+  {
+    "objectID": "ch03.html#discussion",
+    "href": "ch03.html#discussion",
+    "title": "4  Analysis and CAPM Regression",
+    "section": "4.4 Discussion",
+    "text": "4.4 Discussion\nQ1: Which stocks have Beta &gt; 1? Does this match cyclical vs defensive classification?\nFour stocks have Beta &gt; 1: Wuliangye (1.29), BYD (1.28), ZTE (1.24), and Vanke (1.00). These belong to liquor, auto, telecom, and real estate sectors, which are cyclical or growth-oriented. Six stocks have Beta &lt; 1, with ICBC (0.22), Sinopec (0.37), and PetroChina (0.47) being the lowest, belonging to banking and energy, which are classic defensive sectors. The results are highly consistent with the cyclical vs defensive framework.\nQ2: Is Alpha significantly different from zero?\nOnly two stocks show significant alpha at the 5% level. BYD has a positive alpha (p=0.0428), suggesting excess returns beyond CAPM prediction, likely from structural growth in the EV industry. Vanke has a negative alpha (p=0.0083), reflecting sector-specific distress from real estate regulation. The remaining 8 stocks have insignificant alpha, consistent with CAPM theory. Note that CAPM is a single-factor model and significant alpha may stem from omitted factors (size, value).\nQ3: Which stock has the highest and lowest R-squared?\nHighest: Wuliangye (0.4985). Nearly half of its daily variation is explained by the market, reflecting its status as a large-cap consumer blue chip that moves closely with the market.\nLowest: ICBC (0.0661). Only 6.6% of variation is market-driven. ICBC, as a mega-cap state-owned bank, is driven primarily by banking-specific factors (interest rates, provisions, capital adequacy) rather than overall A-share sentiment. Its extremely low Beta (0.22) corroborates this.",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Analysis and CAPM Regression</span>"
+    ]
+  },
+  {
+    "objectID": "ch03.html#conclusions",
+    "href": "ch03.html#conclusions",
+    "title": "4  Analysis and CAPM Regression",
+    "section": "4.5 Conclusions",
+    "text": "4.5 Conclusions\n\nIndustry allocation is the dominant driver of returns during 2020-2026\nFat-tail distributions are universal; VaR models should not rely on normality\nCross-industry diversification effectively reduces idiosyncratic risk\nCAPM Beta aligns well with cyclical/defensive industry classification\nSignificant alpha signals are rare, found only in BYD (+) and Vanke (-)",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Analysis and CAPM Regression</span>"
+    ]
+  }
+]

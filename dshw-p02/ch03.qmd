@@ -1,0 +1,77 @@
+---
+title: "Analysis and CAPM Regression"
+---
+
+## Descriptive Statistics
+
+Daily log returns: $r_t = \ln(P_t / P_{t-1})$
+
+| Stock | Industry | Ann.Return | Ann.Vol | Skewness | Kurtosis | Max Drawdown |
+|-------|----------|-----------|---------|----------|----------|-------------|
+| BYD | Auto | 0.3060 | 0.4330 | 0.30 | 2.09 | -52.54% |
+| PetroChina | Energy | 0.1754 | 0.2927 | 0.22 | 5.17 | -32.47% |
+| ICBC | Banking | 0.0924 | 0.1628 | 0.46 | 5.82 | -20.20% |
+| Sinopec | Energy | 0.0860 | 0.2335 | 0.36 | 5.37 | -25.06% |
+| Moutai | Liquor | 0.0642 | 0.2770 | 0.26 | 3.61 | -47.48% |
+| CMBC | Banking | 0.0468 | 0.2773 | 0.26 | 3.15 | -50.94% |
+| SF Express | Logistics | 0.0158 | 0.3243 | 0.38 | 3.55 | -70.77% |
+| Wuliangye | Liquor | -0.0136 | 0.3454 | 0.09 | 3.32 | -66.09% |
+| ZTE | Telecom | -0.0019 | 0.4260 | 0.31 | 2.49 | -61.87% |
+| Vanke | Real Estate | -0.3243 | 0.3640 | 0.66 | 3.25 | -86.73% |
+
+All stocks exhibit leptokurtic (fat-tail) distributions with excess kurtosis well above zero, meaning the normal distribution systematically underestimates extreme risk. ICBC has the lowest volatility (16.3%) and smallest max drawdown (-20.2%), reflecting its defensive nature.
+
+## Visualization Summary
+
+**Figure 1 (Normalized Price)**: BYD surged far above the benchmark; Vanke declined to about 13% of its starting value; banking stocks tracked the CSI 300 closely.
+
+**Figure 2 (Return Distribution)**: All histograms show peaked centers and fat tails relative to the overlaid normal curve.
+
+**Figure 3 (Correlation Heatmap)**: Intra-industry pairs (CMBC-ICBC, Moutai-Wuliangye, PetroChina-Sinopec) show notably higher correlations, supporting diversification across industries.
+
+**Figure 4 (M2 vs CSI 300)**: Weak contemporaneous linear relationship between M2 growth and monthly index returns, likely due to policy transmission lags and counter-cyclical easing.
+
+**Figure 5 (ROE Trends)**: Liquor ROE consistently high; banking ROE stable but declining; Vanke ROE fell sharply; BYD ROE rising.
+
+## CAPM Regression
+
+Model: $r_{i,t} - r_f = \alpha_i + \beta_i (r_{m,t} - r_f) + \varepsilon_{i,t}$
+
+Market benchmark: CSI 300. Risk-free rate: 2.0% annualized (daily = 0.02/252). Sample: 1,514 trading days.
+
+| Stock | Industry | Alpha | p-value | Beta | 95% CI | R-squared |
+|-------|----------|-------|---------|------|--------|-----------|
+| Wuliangye | Liquor | -0.000088 | 0.8245 | 1.2945 | [1.23, 1.36] | 0.4985 |
+| Moutai | Liquor | +0.000210 | 0.5316 | 0.9772 | [0.92, 1.03] | 0.4418 |
+| CMBC | Banking | +0.000138 | 0.6968 | 0.9049 | [0.85, 0.96] | 0.3780 |
+| BYD | Auto | +0.001180 | 0.0428* | 1.2817 | [1.19, 1.38] | 0.3110 |
+| ZTE | Telecom | -0.000043 | 0.9398 | 1.2436 | [1.15, 1.34] | 0.3025 |
+| Vanke | Real Estate | -0.001331 | 0.0083* | 1.0028 | [0.92, 1.09] | 0.2693 |
+| SF Express | Logistics | +0.000014 | 0.9756 | 0.8751 | [0.80, 0.95] | 0.2584 |
+| PetroChina | Energy | +0.000633 | 0.1614 | 0.4685 | [0.39, 0.54] | 0.0910 |
+| Sinopec | Energy | +0.000275 | 0.4467 | 0.3668 | [0.31, 0.43] | 0.0876 |
+| ICBC | Banking | +0.000295 | 0.2470 | 0.2222 | [0.18, 0.26] | 0.0661 |
+
+## Discussion
+
+**Q1: Which stocks have Beta > 1? Does this match cyclical vs defensive classification?**
+
+Four stocks have Beta > 1: Wuliangye (1.29), BYD (1.28), ZTE (1.24), and Vanke (1.00). These belong to liquor, auto, telecom, and real estate sectors, which are cyclical or growth-oriented. Six stocks have Beta < 1, with ICBC (0.22), Sinopec (0.37), and PetroChina (0.47) being the lowest, belonging to banking and energy, which are classic defensive sectors. The results are highly consistent with the cyclical vs defensive framework.
+
+**Q2: Is Alpha significantly different from zero?**
+
+Only two stocks show significant alpha at the 5% level. BYD has a positive alpha (p=0.0428), suggesting excess returns beyond CAPM prediction, likely from structural growth in the EV industry. Vanke has a negative alpha (p=0.0083), reflecting sector-specific distress from real estate regulation. The remaining 8 stocks have insignificant alpha, consistent with CAPM theory. Note that CAPM is a single-factor model and significant alpha may stem from omitted factors (size, value).
+
+**Q3: Which stock has the highest and lowest R-squared?**
+
+Highest: Wuliangye (0.4985). Nearly half of its daily variation is explained by the market, reflecting its status as a large-cap consumer blue chip that moves closely with the market.
+
+Lowest: ICBC (0.0661). Only 6.6% of variation is market-driven. ICBC, as a mega-cap state-owned bank, is driven primarily by banking-specific factors (interest rates, provisions, capital adequacy) rather than overall A-share sentiment. Its extremely low Beta (0.22) corroborates this.
+
+## Conclusions
+
+1. Industry allocation is the dominant driver of returns during 2020-2026
+2. Fat-tail distributions are universal; VaR models should not rely on normality
+3. Cross-industry diversification effectively reduces idiosyncratic risk
+4. CAPM Beta aligns well with cyclical/defensive industry classification
+5. Significant alpha signals are rare, found only in BYD (+) and Vanke (-)

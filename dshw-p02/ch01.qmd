@@ -1,0 +1,34 @@
+---
+title: "Data Download"
+---
+
+## Stock List
+
+We selected 10 stocks covering 7 industries (Banking, Auto, Liquor, Real Estate, Energy, Telecom, Logistics).
+
+| Code | Name | Industry | Reason |
+|------|------|----------|--------|
+| 600036 | CMBC (Zhao Shang Yin Hang) | Banking | Leading joint-stock bank |
+| 601398 | ICBC (Gong Shang Yin Hang) | Banking | Largest bank by assets globally |
+| 002594 | BYD (Bi Ya Di) | Auto | EV sales leader |
+| 600519 | Moutai (Gui Zhou Mao Tai) | Liquor | A-share market cap benchmark |
+| 000858 | Wuliangye (Wu Liang Ye) | Liquor | Second-tier liquor leader |
+| 000002 | Vanke (Wan Ke) | Real Estate | Established real estate leader |
+| 601857 | PetroChina (Zhong Guo Shi You) | Energy | Largest domestic oil and gas producer |
+| 600028 | Sinopec (Zhong Guo Shi Hua) | Energy | Integrated refining leader |
+| 000063 | ZTE (Zhong Xing Tong Xun) | Telecom | Core 5G equipment supplier |
+| 002352 | SF Express (Shun Feng) | Logistics | Premium express delivery leader |
+
+## Data Sources
+
+| Data Type | Source | Interface | Details |
+|-----------|--------|-----------|---------|
+| Stock prices | baostock | query_history_k_data_plus() | Daily, backward-adjusted, 2020-01 to 2026-04 |
+| Market index | baostock | query_history_k_data_plus() | CSI 300 + CSI 500 |
+| CPI YoY | akshare | macro_china_cpi_yearly() | 70 monthly records |
+| M2 YoY | akshare | macro_china_money_supply() | 74 monthly records |
+| Financials | baostock | query_profit_data() | ROE and net profit margin, 10 x 5 years |
+
+## Download Summary
+
+All 10 stocks downloaded successfully with 1515 trading days each. Both indices (CSI 300 and CSI 500) have 1515 rows. Financial data contains 100 records (10 stocks x 5 years x 2 indicators). All download events are recorded in download_log.txt.
