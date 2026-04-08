@@ -45,7 +45,7 @@
 
 ### GitHub 仓库
 
-https://github.com/599625523-sketch/ex_p02/tree/main/dshw-p01
+https://github.com/599625523-sketch/ex_p02/tree/main/dshw-p02
 
 ### 如何运行
 
