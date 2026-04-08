@@ -1,41 +1,75 @@
 ---
-title: "Data Cleaning and Storage"
+title: "数据清洗与存储"
 ---
 
-## Single-Table Cleaning (6 Steps)
+## 单表清洗（6 个步骤）
 
-| Step | Action | Result |
-|------|--------|--------|
-| 1. Missing detection | Count NaN and empty strings per column | No missing values (baostock data is complete) |
-| 2. Missing handling | ffill for prices, fill 0 for volume | Defensive processing, no actual changes |
-| 3. Date format | Convert to datetime64[ns] | All 10 stocks converted successfully |
-| 4. Data type check | Confirm price/volume columns are numeric | All numeric, no conversion needed |
-| 5. Duplicate removal | Deduplicate by date | 0 duplicates removed |
-| 6. Outlier flagging | Flag daily return exceeding 20% as is_extreme | Flagged but not removed |
+对每只股票的原始数据依次执行以下清洗操作：
 
-Outlier causes include ex-dividend adjustments in backward-adjusted data, resumption after suspension, and extreme market events.
+### 步骤 1：缺失值检测
 
-## Wide and Long Table Conversion
+统计每列的缺失值数量和比例。结果显示 **baostock 下载的数据无缺失值**，这与 baostock 仅返回有交易记录的日期有关（停牌日不出现在数据中）。
 
-Wide table: 1515 days x 10 stocks (one column per stock). Suitable for correlation matrices, multi-line charts, and cross-stock calculations.
+### 步骤 2：缺失值处理
 
-Long table: 15,150 rows x 3 columns (date, code, close). Suitable for groupby operations, faceted plots, panel regression, and database storage.
+虽无实际缺失，仍编写了防御性处理逻辑：价格列使用 `ffill`（向前填充），成交量填充 0。确保流程对其他数据源同样适用。
 
-## Multi-Table Merge
+### 步骤 3：日期格式统一
 
-Stocks (15,150 rows) + Index: left join by date, resulting in 15,150 rows (unchanged, since trading days are aligned).
+将所有表的日期列转换为 `datetime64[ns]` 格式并设为索引。10 只股票全部转换成功。
 
-Monthly macro data (CPI, M2) mapped to daily data via year-month key. CPI has about 1,600 missing values and M2 about 260, both due to publication lag. Final combined dataset: 15,150 rows x 16 columns.
+### 步骤 4：数据类型检查
 
-## Storage Format Comparison
+确认价格和成交量列均为数值型。baostock 返回的数据类型正确，无需额外转换。
 
-Base format (Method A): CSV for all data.
+### 步骤 5：重复值处理
 
-Advanced format (Method B): Parquet, chosen for its columnar storage and built-in schema.
+按日期检测重复行，结果为 **0 条重复**。
 
-| Metric | CSV | Parquet |
-|--------|-----|---------|
-| File size | 1898.3 KB | 888.1 KB (46.8%) |
-| Read time | 0.056s | 0.022s (40.4%) |
+### 步骤 6：离群值标注
 
-Parquet is less than half the size and reads 60% faster. The advantage grows significantly with larger datasets (millions of rows) and selective column reads.
+计算日收益率，对单日涨跌幅超过 ±20% 的记录在新列 `is_extreme` 中标注为 `True`。**不删除**这些记录，仅做标注。
+
+离群值可能成因包括：后复权数据中的除权除息调整、停牌后复牌的价格跳动、极端市场事件（如 2020 年疫情冲击）。
+
+## 宽表与长表转换
+
+**宽表**：将 10 只股票的收盘价合并为宽表，日期为索引，每列一只股票。维度为 1515 天 × 10 只股票。宽表适合计算相关系数矩阵、绘制多股折线图、进行跨股票运算。
+
+**长表**：使用 `pd.melt` 将宽表转回长表，字段为 `date, code, close`，共 15,150 行。长表适合 `groupby` 聚合、分面绑图、面板回归、数据库存储。
+
+## 多表合并
+
+### 个股 + 指数
+
+将 10 只股票的日度数据（15,150 行）与沪深 300 指数按日期做 `left join`，合并后仍为 15,150 行。行数不变是因为交易日完全对齐。
+
+### 日度 + 月度宏观
+
+将月度宏观数据（CPI、M2）通过年月键映射到每个交易日。由于宏观数据存在发布滞后：
+
+- CPI 约有 1,600 个交易日缺少对应值
+- M2 约有 260 个交易日缺少对应值
+
+最终合并数据集：**15,150 行 × 16 列**。
+
+## 存储格式对比
+
+### 方式 A：CSV（基础，必做）
+
+所有原始数据和合并数据均以 CSV 存储。
+
+**优点**：纯文本、通用性强、人类可读、Git diff 友好。
+
+**不足**：数据量达 GB 级时读写慢、体积大；不保存数据类型；不支持列式读取；多表关联查询不便。
+
+### 方式 B：Parquet（进阶）
+
+清洗后数据额外保存一份 Parquet 格式。选择 Parquet 的理由：列式存储、内置 Schema 类型契约、支持只读取需要的列。
+
+| 指标 | CSV | Parquet |
+|------|-----|---------|
+| 文件大小 | 1898.3 KB | 888.1 KB（46.8%） |
+| 读取耗时 | 0.056s | 0.022s（40.4%） |
+
+在本次数据规模（~15,000 行）下，Parquet 体积不到 CSV 的一半，读取速度快约 60%。当数据量达到百万行以上、且只需读取部分列时，优势将更加显著。

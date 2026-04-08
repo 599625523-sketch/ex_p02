@@ -1,14 +1,50 @@
 ---
-title: "Preface"
+title: "前言"
 ---
 
-This is the analysis report for ex_P02 (Data Science and Finance).
+本电子书为数据科学与金融课程作业 P02 的分析报告，涵盖 A 股市场 10 只股票的数据获取、清洗、存储、描述统计、可视化与 CAPM 回归分析全流程。
 
-We selected 10 A-share stocks from 7 industries and built a complete pipeline covering data acquisition, cleaning, storage, descriptive statistics, visualization, and CAPM regression.
+## 选股概览
 
-## Key Findings
+从 A 股市场选取 10 只股票，覆盖银行、汽车、白酒、房地产、能源、通讯、物流共 **7 个行业**，均为各行业辨识度高、数据完整的龙头公司。
 
-1. BYD had the highest annualized return (+30.6%), Vanke the lowest (-32.4%)
-2. All return distributions exhibit fat tails, invalidating the normality assumption
-3. Intra-industry correlations are significantly higher than cross-industry ones
-4. CAPM Beta aligns well with cyclical vs defensive industry classification
+| 代码 | 名称 | 行业 | 选股理由 |
+|------|------|------|---------|
+| 600036 | 招商银行 | 银行 | 股份制银行龙头，盈利能力突出 |
+| 601398 | 工商银行 | 银行 | 全球资产规模最大的银行 |
+| 002594 | 比亚迪 | 汽车 | 新能源汽车销量龙头 |
+| 600519 | 贵州茅台 | 白酒 | A 股市值标杆，消费行业代表 |
+| 000858 | 五粮液 | 白酒 | 白酒行业第二梯队龙头 |
+| 000002 | 万科A | 房地产 | 老牌房企龙头 |
+| 601857 | 中国石油 | 能源 | 国内最大油气生产商 |
+| 600028 | 中国石化 | 能源 | 炼化一体龙头 |
+| 000063 | 中兴通讯 | 通讯 | 5G 设备核心供应商 |
+| 002352 | 顺丰控股 | 物流 | 快递行业高端市场龙头 |
+
+## 主要发现
+
+1. **比亚迪**年化收益率最高（+30.6%），**万科A**最低（-32.4%），行业配置是 2020-2026 年收益的主要驱动力
+2. 所有股票的收益率分布均呈**尖峰厚尾**特征，正态分布假设不成立
+3. **同行业内相关性显著高于跨行业**，支持行业分散化配置策略
+4. CAPM Beta 与**周期性 vs 防御性**行业分类高度吻合
+5. 仅比亚迪（正 Alpha）和万科A（负 Alpha）存在统计显著的异常收益
+
+## 数据来源
+
+| 数据类型 | 来源 | 接口 | 说明 |
+|----------|------|------|------|
+| 股票行情 | baostock | `query_history_k_data_plus()` | 后复权日度数据，2020-01 至 2026-04 |
+| 市场指数 | baostock | `query_history_k_data_plus()` | 沪深 300 + 中证 500 |
+| CPI 同比 | akshare | `macro_china_cpi_yearly()` | 月度，70 条记录 |
+| M2 同比 | akshare | `macro_china_money_supply()` | 月度，74 条记录 |
+| 财务指标 | baostock | `query_profit_data()` | ROE 和净利润率，10×5 年 |
+
+## 如何运行
+
+```bash
+git clone https://github.com/599625523-sketch/ex_p02.git
+cd ex_p02/dshw-p02
+pip install -r requirements.txt
+```
+
+依次运行三个 Notebook：`01_download.ipynb` → `02_clean.ipynb` → `03_analysis.ipynb`。

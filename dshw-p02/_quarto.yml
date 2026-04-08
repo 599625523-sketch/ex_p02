@@ -1,10 +1,11 @@
 project:
   type: book
-  output-dir: docs
+  output-dir: ../docs
 
 book:
-  title: "P02 Financial Data Analysis"
-  author: "Li Xianji"
+  title: "P02：金融数据获取、管理与初步分析"
+  author: "李贤记"
+  date: "2026-04-08"
   chapters:
     - index.qmd
     - ch01.qmd
@@ -14,3 +15,8 @@ book:
 format:
   html:
     theme: cosmo
+    lang: zh
+    toc: true
+    number-sections: true
+    code-fold: true
+    code-tools: true

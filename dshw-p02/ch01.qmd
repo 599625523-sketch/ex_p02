@@ -1,34 +1,48 @@
 ---
-title: "Data Download"
+title: "数据获取与下载"
 ---
 
-## Stock List
+## 股票行情数据
 
-We selected 10 stocks covering 7 industries (Banking, Auto, Liquor, Real Estate, Energy, Telecom, Logistics).
+使用 baostock 的 `query_history_k_data_plus()` 接口下载 10 只股票 2020-01-01 至今的**后复权日度行情**，字段包括：日期、开盘价、收盘价、最高价、最低价、成交量、成交额。
 
-| Code | Name | Industry | Reason |
-|------|------|----------|--------|
-| 600036 | CMBC (Zhao Shang Yin Hang) | Banking | Leading joint-stock bank |
-| 601398 | ICBC (Gong Shang Yin Hang) | Banking | Largest bank by assets globally |
-| 002594 | BYD (Bi Ya Di) | Auto | EV sales leader |
-| 600519 | Moutai (Gui Zhou Mao Tai) | Liquor | A-share market cap benchmark |
-| 000858 | Wuliangye (Wu Liang Ye) | Liquor | Second-tier liquor leader |
-| 000002 | Vanke (Wan Ke) | Real Estate | Established real estate leader |
-| 601857 | PetroChina (Zhong Guo Shi You) | Energy | Largest domestic oil and gas producer |
-| 600028 | Sinopec (Zhong Guo Shi Hua) | Energy | Integrated refining leader |
-| 000063 | ZTE (Zhong Xing Tong Xun) | Telecom | Core 5G equipment supplier |
-| 002352 | SF Express (Shun Feng) | Logistics | Premium express delivery leader |
+每只股票均获得 **1515 个交易日**的完整数据，无缺失。
 
-## Data Sources
+下载函数内置日志记录功能，每次下载的结果自动写入 `download_log.txt`，格式如下：
 
-| Data Type | Source | Interface | Details |
-|-----------|--------|-----------|---------|
-| Stock prices | baostock | query_history_k_data_plus() | Daily, backward-adjusted, 2020-01 to 2026-04 |
-| Market index | baostock | query_history_k_data_plus() | CSI 300 + CSI 500 |
-| CPI YoY | akshare | macro_china_cpi_yearly() | 70 monthly records |
-| M2 YoY | akshare | macro_china_money_supply() | 74 monthly records |
-| Financials | baostock | query_profit_data() | ROE and net profit margin, 10 x 5 years |
+```
+[2026-04-08 09:10:12] SUCCESS  stock_600036  shape=(1515, 7)
+[2026-04-08 09:10:15] SUCCESS  stock_601398  shape=(1515, 7)
+...
+```
 
-## Download Summary
+## 市场指数数据
 
-All 10 stocks downloaded successfully with 1515 trading days each. Both indices (CSI 300 and CSI 500) have 1515 rows. Financial data contains 100 records (10 stocks x 5 years x 2 indicators). All download events are recorded in download_log.txt.
+下载两个指数的日度数据：
+
+- **沪深 300**（000300）：CAPM 分析的市场基准，必选
+- **中证 500**（000905）：覆盖中小盘股票，与沪深 300 互补，用于观察大小盘风格差异
+
+两个指数均获得 1515 行数据，与个股交易日完全对齐。
+
+## 宏观经济指标
+
+下载两项月度宏观指标：
+
+| 指标 | 来源 | 记录数 | 选择理由 |
+|------|------|--------|---------|
+| CPI 同比增速 | akshare `macro_china_cpi_yearly()` | 70 条 | 反映物价水平，与货币政策和股市估值密切相关 |
+| M2 同比增速 | akshare `macro_china_money_supply()` | 74 条 | 衡量广义货币供应量，增速上升代表流动性宽松，理论上利好股市 |
+
+## 财务指标
+
+通过 baostock 的 `query_profit_data()` 获取 10 只股票 2020-2024 年共 5 个年度的财务数据，包括：
+
+- **净资产收益率（ROE）**：衡量股东权益回报效率
+- **净利润率**：衡量盈利质量
+
+数据以**长格式**（Long format）存储：每行为一只股票一个年度的一个指标，字段为 `code, year, indicator, value`，共 100 条记录。
+
+## 下载日志
+
+所有下载事件均记录在 `download_log.txt` 中，包含时间戳、状态（SUCCESS/FAILED）、数据标识和数据维度，便于追溯和复现。
