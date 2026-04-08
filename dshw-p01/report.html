@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>P02：金融数据获取、管理与初步分析 — 分析报告</title>
+<style>
+  body { font-family: 'Microsoft YaHei', 'SimHei', 'Segoe UI', sans-serif; max-width: 960px; margin: 40px auto; padding: 0 20px; line-height: 1.8; color: #333; background: #fafafa; }
+  h1 { color: #1a1a2e; border-bottom: 3px solid #16213e; padding-bottom: 10px; }
+  h2 { color: #16213e; border-bottom: 1px solid #ccc; padding-bottom: 6px; margin-top: 40px; }
+  h3 { color: #0f3460; margin-top: 30px; }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 14px; }
+  th, td { border: 1px solid #ddd; padding: 8px 10px; text-align: center; }
+  th { background: #16213e; color: white; font-weight: 600; }
+  tr:nth-child(even) { background: #f2f2f2; }
+  tr:hover { background: #e8eaf6; }
+  .highlight { background: #fff3cd; padding: 12px 16px; border-left: 4px solid #ffc107; margin: 16px 0; border-radius: 4px; }
+  .section-box { background: white; padding: 20px 24px; margin: 20px 0; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .fig-caption { text-align: center; font-size: 13px; color: #666; margin-top: 4px; }
+  .conclusion { background: #e8f5e9; padding: 16px 20px; border-left: 4px solid #4caf50; border-radius: 4px; }
+  .meta { color: #888; font-size: 14px; }
+  code { background: #f5f5f5; padding: 2px 6px; border-radius: 3px; font-size: 13px; }
+  img { max-width: 100%; height: auto; display: block; margin: 12px auto; border: 1px solid #eee; border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<h1>P02：金融数据获取、管理与初步分析</h1>
+<p class="meta">
+  <strong>作业编号</strong>：ex_P02 &nbsp;|&nbsp;
+  <strong>姓名</strong>：李贤记 &nbsp;|&nbsp;
+  <strong>版本</strong>：v1 &nbsp;|&nbsp;
+  <strong>日期</strong>：2026 年 4 月
+</p>
+
+<!-- ===== 1. 项目概述 ===== -->
+<div class="section-box">
+<h2>一、项目概述</h2>
+<p>本报告基于 A 股市场 10 只代表性股票，建立了一套完整的金融数据处理与分析流程，涵盖数据获取、清洗、存储、描述统计、可视化与 CAPM 回归分析。数据时间范围为 <strong>2020-01-02 至 2026-04-07</strong>，共 1515 个交易日。</p>
+
+<h3>1.1 股票列表</h3>
+<p>从 7 个行业中选取 10 只股票，涵盖银行、汽车、白酒、房地产、能源、通讯、物流：</p>
+
+<table>
+  <tr><th>代码</th><th>名称</th><th>行业</th><th>选股理由</th></tr>
+  <tr><td>600036</td><td>招商银行</td><td>银行</td><td>股份制银行龙头，盈利能力突出</td></tr>
+  <tr><td>601398</td><td>工商银行</td><td>银行</td><td>全球资产规模最大的银行</td></tr>
+  <tr><td>002594</td><td>比亚迪</td><td>汽车</td><td>新能源汽车销量龙头</td></tr>
+  <tr><td>600519</td><td>贵州茅台</td><td>白酒</td><td>A 股市值标杆，消费行业代表</td></tr>
+  <tr><td>000858</td><td>五粮液</td><td>白酒</td><td>白酒行业第二梯队龙头</td></tr>
+  <tr><td>000002</td><td>万科A</td><td>房地产</td><td>老牌房企龙头</td></tr>
+  <tr><td>601857</td><td>中国石油</td><td>能源</td><td>国内最大油气生产商</td></tr>
+  <tr><td>600028</td><td>中国石化</td><td>能源</td><td>炼化一体龙头</td></tr>
+  <tr><td>000063</td><td>中兴通讯</td><td>通讯</td><td>5G 设备核心供应商</td></tr>
+  <tr><td>002352</td><td>顺丰控股</td><td>物流</td><td>快递行业高端市场龙头</td></tr>
+</table>
+
+<h3>1.2 数据来源</h3>
+<table>
+  <tr><th>数据类型</th><th>来源工具</th><th>接口</th><th>说明</th></tr>
+  <tr><td>个股日度行情</td><td>baostock</td><td><code>query_history_k_data_plus()</code></td><td>后复权，日度，含开高低收、成交量、成交额</td></tr>
+  <tr><td>市场指数</td><td>baostock</td><td><code>query_history_k_data_plus()</code></td><td>沪深 300 (000300) + 中证 500 (000905)</td></tr>
+  <tr><td>CPI 同比</td><td>akshare</td><td><code>macro_china_cpi_yearly()</code></td><td>70 条月度数据</td></tr>
+  <tr><td>M2 同比增速</td><td>akshare</td><td><code>macro_china_money_supply()</code></td><td>74 条月度数据</td></tr>
+  <tr><td>财务指标 (ROE、净利润率)</td><td>baostock</td><td><code>query_profit_data()</code></td><td>10 只 × 5 年 = 100 条记录</td></tr>
+</table>
+<p><strong>指数选择理由</strong>：沪深 300 为大盘蓝筹代表，用作 CAPM 市场基准；中证 500 覆盖中小盘，与沪深 300 互补，便于观察风格差异。</p>
+<p><strong>M2 选择理由</strong>：M2 衡量广义货币供应量，其增速反映货币政策松紧方向，与股市流动性环境密切相关。</p>
+</div>
+
+<!-- ===== 2. 数据清洗 ===== -->
+<div class="section-box">
+<h2>二、数据清洗</h2>
+<p>在 <code>02_clean.ipynb</code> 中对原始数据进行了 6 个步骤的系统清洗，每步均记录了清洗前后的变化。</p>
+
+<table>
+  <tr><th>步骤</th><th>操作</th><th>结果</th></tr>
+  <tr><td>1. 缺失值检测</td><td>统计每列 NaN 和空字符串</td><td>baostock 数据完整，<strong>无缺失值</strong></td></tr>
+  <tr><td>2. 缺失值处理</td><td>价格列 ffill、成交量填 0</td><td>防御性处理，无实际变化</td></tr>
+  <tr><td>3. 日期格式统一</td><td>全部转为 <code>datetime64[ns]</code></td><td>10 只股票全部转换完成</td></tr>
+  <tr><td>4. 数据类型检查</td><td>确认数值列为 float/int</td><td>全部为数值型，无需转换</td></tr>
+  <tr><td>5. 重复值处理</td><td>按日期去重</td><td>删除 <strong>0</strong> 条重复记录</td></tr>
+  <tr><td>6. 离群值标注</td><td>|日收益率| &gt; ln(1.20) 标注 is_extreme</td><td>已标注，保留不删除</td></tr>
+</table>
+
+<h3>2.1 宽表与长表转换</h3>
+<p>将 10 只股票收盘价合并为<strong>宽表</strong>（1515 天 × 10 列），再通过 <code>pd.melt</code> 转回<strong>长表</strong>（15150 行 × 3 列）。</p>
+<ul>
+  <li><strong>宽表</strong>适合横向对比：相关系数矩阵、多股走势叠加、列间运算等。</li>
+  <li><strong>长表</strong>适合分组统计：<code>groupby</code>、分面可视化、Panel 回归、数据库存储等。</li>
+</ul>
+
+<h3>2.2 多表合并</h3>
+<p>个股（15150 行）+ 指数：按日期 left join → <strong>15150 行</strong>（行数不变，交易日一致）。合并月度宏观数据时，通过提取年月 (<code>dt.to_period('M')</code>) 映射到每个交易日。CPI 因发布滞后存在约 1600 条缺失，M2 缺失约 260 条，均属正常。最终综合数据 <strong>15150 行 × 16 列</strong>。</p>
+
+<h3>2.3 存储方式</h3>
+<p><strong>方式 A（CSV，必做）</strong>：所有数据以 CSV 存储，通用性强、人类可读、Git 友好。不足之处是不保存数据类型、大数据量下读写慢。</p>
+<p><strong>方式 B（Parquet，进阶）</strong>：额外保存一份 Parquet 格式。对比结果：</p>
+<table>
+  <tr><th>指标</th><th>CSV</th><th>Parquet</th></tr>
+  <tr><td>文件大小</td><td>1898.3 KB</td><td>888.1 KB（<strong>46.8%</strong>）</td></tr>
+  <tr><td>读取耗时</td><td>0.056s</td><td>0.022s（<strong>40.4%</strong>）</td></tr>
+</table>
+<p>在当前数据规模下差异已经可见（Parquet 体积不到 CSV 的一半、读取快 60%）。数据量达到百万行以上时优势会更加显著，尤其是只需读取少数列的场景。</p>
+</div>
+
+<!-- ===== 3. 描述性统计 ===== -->
+<div class="section-box">
+<h2>三、描述性统计</h2>
+<p>计算 10 只股票日对数收益率 <em>r<sub>t</sub> = ln(P<sub>t</sub> / P<sub>t-1</sub>)</em> 的主要统计量：</p>
+
+<table>
+  <tr><th>股票</th><th>行业</th><th>年化均值</th><th>年化波动率</th><th>偏度</th><th>峰度</th><th>最大回撤</th></tr>
+  <tr><td>比亚迪</td><td>汽车</td><td>0.3060</td><td>0.4330</td><td>0.30</td><td>2.09</td><td>-52.54%</td></tr>
+  <tr><td>中国石油</td><td>能源</td><td>0.1754</td><td>0.2927</td><td>0.22</td><td>5.17</td><td>-32.47%</td></tr>
+  <tr><td>工商银行</td><td>银行</td><td>0.0924</td><td>0.1628</td><td>0.46</td><td>5.82</td><td>-20.20%</td></tr>
+  <tr><td>中国石化</td><td>能源</td><td>0.0860</td><td>0.2335</td><td>0.36</td><td>5.37</td><td>-25.06%</td></tr>
+  <tr><td>贵州茅台</td><td>白酒</td><td>0.0642</td><td>0.2770</td><td>0.26</td><td>3.61</td><td>-47.48%</td></tr>
+  <tr><td>招商银行</td><td>银行</td><td>0.0468</td><td>0.2773</td><td>0.26</td><td>3.15</td><td>-50.94%</td></tr>
+  <tr><td>顺丰控股</td><td>物流</td><td>0.0158</td><td>0.3243</td><td>0.38</td><td>3.55</td><td>-70.77%</td></tr>
+  <tr><td>五粮液</td><td>白酒</td><td>-0.0136</td><td>0.3454</td><td>0.09</td><td>3.32</td><td>-66.09%</td></tr>
+  <tr><td>中兴通讯</td><td>通讯</td><td>-0.0019</td><td>0.4260</td><td>0.31</td><td>2.49</td><td>-61.87%</td></tr>
+  <tr><td>万科A</td><td>房地产</td><td>-0.3243</td><td>0.3640</td><td>0.66</td><td>3.25</td><td>-86.73%</td></tr>
+</table>
+
+<p><strong>关键发现</strong>：</p>
+<ul>
+  <li>比亚迪年化收益率最高（30.6%），受益于新能源产业爆发；万科A 年化收益率为 -32.4%，房地产行业调控冲击严重。</li>
+  <li>工商银行波动率最低（16.3%），最大回撤仅 -20.2%，体现了银行股的防御特性。</li>
+  <li>所有股票峰度均显著大于 0（超额峰度），说明收益率呈"厚尾"分布，极端收益概率高于正态假设。</li>
+  <li>万科A 最大回撤 -86.73%，反映了行业系统性风险。</li>
+</ul>
+</div>
+
+<!-- ===== 4. 可视化 ===== -->
+<div class="section-box">
+<h2>四、可视化分析</h2>
+
+<h3>图 1：归一化收盘价走势</h3>
+<p>以首个交易日（2020-01-02）= 1 为基准，10 只股票与沪深 300 的归一化走势：</p>
+<div class="highlight">
+  <strong>解读</strong>：不同行业在 2020-2026 年间表现分化显著。比亚迪涨幅远超大盘，峰值接近基准的 7-8 倍；银行股走势平稳，与沪深 300 高度同步；万科A 持续下行，跌至基准的约 0.13 倍。能源板块在 2021-2022 年国际油价上涨期间有明显上行。行业选择对投资回报的影响远大于市场整体涨跌。
+</div>
+
+<h3>图 2：日收益率分布</h3>
+<p>2×5 分面直方图，每个子图叠加正态分布曲线并标注均值 (μ) 和标准差 (σ)：</p>
+<div class="highlight">
+  <strong>解读</strong>：所有股票收益率分布均呈"尖峰厚尾"特征——分布中心比正态更集中，但极端值更频繁。这意味着正态分布假设系统性低估了极端风险。银行股分布更集中（低波动），比亚迪和万科A 分布更分散（高波动）。
+</div>
+
+<h3>图 3：收益率相关系数热力图</h3>
+<p>按行业排序的 10×10 相关系数矩阵：</p>
+<div class="highlight">
+  <strong>解读</strong>：同行业相关性明显高于跨行业——招商银行与工商银行、贵州茅台与五粮液、中国石油与中国石化之间的相关系数均较高。跨行业相关性偏低，表明行业分散化配置可有效降低组合非系统性风险。工商银行与其他股票的相关性最低（与其极低的 R² 一致）。
+</div>
+
+<h3>图 4：M2 同比增速 vs 沪深 300 月度收益率</h3>
+<p>散点图 + 线性拟合线，标注 Pearson 相关系数：</p>
+<div class="highlight">
+  <strong>解读</strong>：M2 同比增速与沪深 300 月度收益率的线性关系较弱。理论上 M2 增速上升意味着流动性宽松、利好股市，但实际关系受到两个因素稀释：（1）货币政策传导存在时滞，当期 M2 变化可能数月后才影响股价；（2）M2 增速上升有时伴随经济下行（逆周期调节），宽松政策未必立即提振市场。
+</div>
+
+<h3>图 5（选做）：ROE 跨公司对比</h3>
+<div class="highlight">
+  <strong>解读</strong>：白酒行业 ROE 持续高位，体现高毛利率与品牌壁垒；银行业 ROE 稳定但趋降，受利率市场化压力；万科A ROE 大幅下滑，与行业调控密切相关；比亚迪 ROE 逐年上升，反映新能源汽车销量的快速增长。
+</div>
+</div>
+
+<!-- ===== 5. CAPM 回归 ===== -->
+<div class="section-box">
+<h2>五、CAPM 回归分析</h2>
+<p>对 10 只股票分别估计 CAPM 模型：</p>
+<p style="text-align:center; font-size:16px;"><em>r<sub>i,t</sub> - r<sub>f</sub> = &alpha;<sub>i</sub> + &beta;<sub>i</sub>(r<sub>m,t</sub> - r<sub>f</sub>) + &epsilon;<sub>i,t</sub></em></p>
+<p>其中市场基准为沪深 300，无风险利率年化 2.0%（日频 = 0.02/252），使用 <code>statsmodels.OLS</code> 估计，共 1514 个交易日。</p>
+
+<h3>5.1 回归结果汇总</h3>
+<table>
+  <tr><th>股票</th><th>行业</th><th>&alpha;&#770;</th><th>p 值(&alpha;)</th><th>&beta;&#770;</th><th>95% CI</th><th>R²</th></tr>
+  <tr><td>五粮液</td><td>白酒</td><td>-0.000088</td><td>0.8245</td><td><strong>1.2945</strong></td><td>[1.2290, 1.3600]</td><td><strong>0.4985</strong></td></tr>
+  <tr><td>贵州茅台</td><td>白酒</td><td>+0.000210</td><td>0.5316</td><td>0.9772</td><td>[0.9218, 1.0326]</td><td>0.4418</td></tr>
+  <tr><td>招商银行</td><td>银行</td><td>+0.000138</td><td>0.6968</td><td>0.9049</td><td>[0.8463, 0.9634]</td><td>0.3780</td></tr>
+  <tr><td>比亚迪</td><td>汽车</td><td>+0.001180</td><td><strong>0.0428*</strong></td><td><strong>1.2817</strong></td><td>[1.1854, 1.3779]</td><td>0.3110</td></tr>
+  <tr><td>中兴通讯</td><td>通讯</td><td>-0.000043</td><td>0.9398</td><td><strong>1.2436</strong></td><td>[1.1483, 1.3388]</td><td>0.3025</td></tr>
+  <tr><td>万科A</td><td>房地产</td><td>-0.001331</td><td><strong>0.0083*</strong></td><td><strong>1.0028</strong></td><td>[0.9194, 1.0861]</td><td>0.2693</td></tr>
+  <tr><td>顺丰控股</td><td>物流</td><td>+0.000014</td><td>0.9756</td><td>0.8751</td><td>[0.8003, 0.9499]</td><td>0.2584</td></tr>
+  <tr><td>中国石油</td><td>能源</td><td>+0.000633</td><td>0.1614</td><td>0.4685</td><td>[0.3938, 0.5432]</td><td>0.0910</td></tr>
+  <tr><td>中国石化</td><td>能源</td><td>+0.000275</td><td>0.4467</td><td>0.3668</td><td>[0.3070, 0.4265]</td><td>0.0876</td></tr>
+  <tr><td>工商银行</td><td>银行</td><td>+0.000295</td><td>0.2470</td><td>0.2222</td><td>[0.1801, 0.2643]</td><td><strong>0.0661</strong></td></tr>
+</table>
+<p style="font-size:13px; color:#888;">* 表示在 5% 水平下显著。表格按 R² 降序排列。</p>
+
+<h3>5.2 讨论</h3>
+
+<h4>问题 1：哪些股票 &beta;&#770; &gt; 1？与"周期性 vs 防御性"是否吻合？</h4>
+<p>&beta; &gt; 1 的有 4 只：<strong>五粮液</strong>（1.29）、<strong>比亚迪</strong>（1.28）、<strong>中兴通讯</strong>（1.24）、<strong>万科A</strong>（1.00，接近 1）。它们分别属于白酒、汽车、通讯、房地产——这些都是市场弹性较大的消费/成长/周期行业，在牛市中涨幅大于大盘，在熊市中跌幅也更深。</p>
+<p>&beta; &lt; 1 的有 6 只，其中工商银行（0.22）、中国石化（0.37）、中国石油（0.47）的 Beta 尤其低。银行和能源属于典型的防御性板块，盈利稳定、分红率高，股价对市场情绪的敏感度较低。</p>
+<p><strong>结论</strong>：Beta 的高低与行业的"周期性 vs 防御性"分类高度吻合。</p>
+
+<h4>问题 2：&alpha;&#770; 是否显著异于零？</h4>
+<p>在 5% 显著性水平下，仅有 2 只股票的 &alpha; 显著：</p>
+<ul>
+  <li><strong>比亚迪</strong>：&alpha; = +0.00118，p = 0.0428 → 显著为正。说明在控制市场风险后，比亚迪获得了超额正收益，可能来源于新能源行业的结构性增长红利。</li>
+  <li><strong>万科A</strong>：&alpha; = -0.00133，p = 0.0083 → 显著为负。说明万科在控制市场风险后仍然跑输，反映了房地产行业特有的政策压力和信用危机。</li>
+</ul>
+<p>其余 8 只股票 &alpha; 均不显著（p &gt; 0.05），回报基本可被市场因子解释，符合 CAPM 理论预期。需注意 CAPM 是单因子模型，&alpha; 的显著性可能源于遗漏的规模、价值等因子，不等同于"选股能力"。</p>
+
+<h4>问题 3：R² 最高和最低分别是谁？</h4>
+<ul>
+  <li><strong>R² 最高：五粮液（0.4985）</strong>。近一半的日波动可由市场解释，说明五粮液作为大消费龙头蓝筹，走势高度跟随大盘，机构持仓集中、流动性好。</li>
+  <li><strong>R² 最低：工商银行（0.0661）</strong>。仅 6.6% 的波动由市场解释，绝大部分波动来自个股特有因素。工商银行作为超大盘国有银行，其走势更多受银行业自身政策（利率、拨备、资本充足率）驱动，而非 A 股整体情绪。Beta 仅 0.22 也印证了这一点。</li>
+</ul>
+</div>
+
+<!-- ===== 6. 结论 ===== -->
+<div class="section-box">
+<h2>六、主要结论</h2>
+<div class="conclusion">
+<ol>
+  <li><strong>行业分化显著</strong>：2020-2026 年间，新能源汽车（比亚迪，年化 +30.6%）与房地产（万科A，年化 -32.4%）形成了极端对比，行业配置是决定收益的核心因素。</li>
+  <li><strong>收益率"厚尾"特征普遍</strong>：10 只股票的峰度均显著大于 0，正态分布低估了极端风险，VaR 等风险指标不宜直接基于正态假设。</li>
+  <li><strong>行业分散化有效</strong>：同行业相关性高、跨行业相关性低，支持通过行业配置分散非系统性风险。</li>
+  <li><strong>宏观指标同期预测力弱</strong>：M2 同比增速与沪深 300 月度收益率的 Pearson 相关系数较低，货币政策对股市的影响存在时滞。</li>
+  <li><strong>CAPM Beta 符合理论预期</strong>：消费/成长/周期行业 Beta 高（&gt;1），银行/能源防御性行业 Beta 低（&lt;1）。R² 的差异反映了不同股票被市场系统性风险驱动的程度。</li>
+  <li><strong>Alpha 信号稀少</strong>：仅比亚迪和万科A 的 Alpha 显著，分别反映了新能源的超额红利和房地产的超额损失。</li>
+</ol>
+</div>
+</div>
+
+<!-- ===== 附录 ===== -->
+<div class="section-box">
+<h2>附录：项目结构与运行说明</h2>
+<pre style="background:#f5f5f5; padding:16px; border-radius:6px; font-size:13px; overflow-x:auto;">
+dshw-p01/
+├── README.md
+├── report.html              ← 本报告
+├── requirements.txt
+├── .gitignore
+├── 01_download.ipynb        ← 数据下载
+├── 02_clean.ipynb           ← 数据清洗
+├── 03_analysis.ipynb        ← 描述统计与回归分析
+├── data/
+│   ├── stock/               ← 10 只个股 CSV
+│   ├── index/               ← 沪深300、中证500
+│   ├── macro/               ← CPI、M2
+│   ├── finance/             ← 财务数据（长格式）
+│   ├── clean/               ← 清洗后数据（CSV + Parquet）
+│   └── combined/            ← 合并后综合数据
+├── output/                  ← 图形输出（PNG, 150 dpi）
+└── download_log.txt         ← 下载日志
+</pre>
+<p><strong>运行步骤</strong>：</p>
+<ol>
+  <li>安装依赖：<code>pip install -r requirements.txt</code></li>
+  <li>运行 <code>01_download.ipynb</code> 下载原始数据</li>
+  <li>运行 <code>02_clean.ipynb</code> 清洗并存储数据</li>
+  <li>运行 <code>03_analysis.ipynb</code> 查看分析结果</li>
+</ol>
+</div>
+
+</body>
+</html>

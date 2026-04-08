@@ -1,0 +1,28 @@
+[2026-04-08 09:08:31] SUCCESS  stock_600036         shape=(1515, 9)
+[2026-04-08 09:08:35] SUCCESS  stock_601398         shape=(1515, 9)
+[2026-04-08 09:08:40] SUCCESS  stock_002594         shape=(1515, 9)
+[2026-04-08 09:08:45] SUCCESS  stock_600519         shape=(1515, 9)
+[2026-04-08 09:08:48] SUCCESS  stock_000858         shape=(1515, 9)
+[2026-04-08 09:08:56] SUCCESS  stock_000002         shape=(1515, 9)
+[2026-04-08 09:09:00] SUCCESS  stock_601857         shape=(1515, 9)
+[2026-04-08 09:09:06] SUCCESS  stock_600028         shape=(1515, 9)
+[2026-04-08 09:09:10] SUCCESS  stock_000063         shape=(1515, 9)
+[2026-04-08 09:09:18] SUCCESS  stock_002352         shape=(1515, 9)
+[2026-04-08 09:09:25] SUCCESS  index_000300         shape=(1515, 7)
+[2026-04-08 09:09:31] SUCCESS  index_000905         shape=(1515, 7)
+[2026-04-08 09:09:31] FAILED   macro_cpi            Error: name 'ak' is not defined
+[2026-04-08 09:09:31] FAILED   macro_m2             Error: name 'ak' is not defined
+[2026-04-08 09:10:17] SUCCESS  macro_cpi            shape=(70, 2)
+[2026-04-08 09:10:17] FAILED   macro_cpi            Error: name 'macro_ok' is not defined
+[2026-04-08 09:12:08] SUCCESS  macro_cpi            shape=(70, 2)
+[2026-04-08 09:12:17] SUCCESS  macro_m2             shape=(74, 2)
+[2026-04-08 09:13:11] SUCCESS  finance_600036       years=[2020, 2021, 2022, 2023, 2024]
+[2026-04-08 09:13:13] SUCCESS  finance_601398       years=[2020, 2021, 2022, 2023, 2024]
+[2026-04-08 09:13:14] SUCCESS  finance_002594       years=[2020, 2021, 2022, 2023, 2024]
+[2026-04-08 09:13:18] SUCCESS  finance_600519       years=[2020, 2021, 2022, 2023, 2024]
+[2026-04-08 09:13:22] SUCCESS  finance_000858       years=[2020, 2021, 2022, 2023, 2024]
+[2026-04-08 09:13:30] SUCCESS  finance_000002       years=[2020, 2021, 2022, 2023, 2024]
+[2026-04-08 09:13:34] SUCCESS  finance_601857       years=[2020, 2021, 2022, 2023, 2024]
+[2026-04-08 09:13:39] SUCCESS  finance_600028       years=[2020, 2021, 2022, 2023, 2024]
+[2026-04-08 09:13:43] SUCCESS  finance_000063       years=[2020, 2021, 2022, 2023, 2024]
+[2026-04-08 09:13:49] SUCCESS  finance_002352       years=[2020, 2021, 2022, 2023, 2024]
