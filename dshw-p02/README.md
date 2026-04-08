@@ -57,6 +57,12 @@ https://github.com/599625523-sketch/ex_p02/tree/main/dshw-p01
 6. 运行 `03_analysis.ipynb` 查看描述统计、可视化与 CAPM 回归结果
 7. 打开 `report.html` 阅读完整分析报告
 
+### 在线电子书
+
+https://599625523-sketch.github.io/ex_p02/
+
+使用 Quarto 渲染，发布至 GitHub Pages。
+
 ### 说明
 
 - `data/clean/` 和 `data/combined/` 中的清洗/合并后数据已上传，可直接运行 `03_analysis.ipynb`

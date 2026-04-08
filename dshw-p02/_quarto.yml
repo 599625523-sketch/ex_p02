@@ -1,0 +1,25 @@
+project:
+  type: book
+  output-dir: docs
+
+book:
+  title: "P02：金融数据获取、管理与初步分析"
+  author: "李贤记"
+  date: "2026-04-08"
+  chapters:
+    - index.qmd
+    - 01_download.ipynb
+    - 02_clean.ipynb
+    - 03_analysis.ipynb
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-fold: true
+    code-tools: true
+
+execute:
+  enabled: false
